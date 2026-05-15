@@ -222,7 +222,7 @@ void projectile_system::parabola_do_attack(projectile& proj, zombie* z) {
             true,
             proj.flags,
             proj.from_plant);
-        
+
         attack_target_zombie(proj, nullptr);
     } else {
         attack_target_zombie(proj, z);
@@ -307,7 +307,7 @@ void projectile_system::do_parabola_motion(projectile& proj) {
         zombie_target = find_zombie_target(proj);
     }
 
-    if (zombie_target) {
+    if (zombie_target || (proj.type == projectile_type::cob_cannon && scene.disable_cob_delay)) {
         parabola_do_attack(proj, zombie_target);
     } else if (plant_target == nullptr) {
         if (proj.dy1 <= (proj.type == projectile_type::cob_cannon ? -40 : 80)) {

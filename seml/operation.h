@@ -114,7 +114,8 @@ int get_fixed_card_op_tick(const FixedCard* fixed_card, int tick)
     auto plant_type = fixed_card->plant_type;
 
     if (plant_type == pvz_emulator::object::plant_type::jalapeno
-        || plant_type == pvz_emulator::object::plant_type::cherry_bomb) {
+        || plant_type == pvz_emulator::object::plant_type::cherry_bomb
+        || plant_type == pvz_emulator::object::plant_type::doomshroom) {
         return tick - 99;
     } else if (plant_type == pvz_emulator::object::plant_type::squash) {
         return tick - 181;

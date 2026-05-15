@@ -42,7 +42,7 @@ void validate_config(Config& config)
 std::mutex mtx;
 Table table;
 
-void test_one(const Config& config, int repeat)
+void test_one(const Config& config, int repeat, bool disable_cob_delay)
 {
     world w(config.setting.scene_type);
     Table local_table;
@@ -57,6 +57,7 @@ void test_one(const Config& config, int repeat)
 
             w.scene.reset();
             w.scene.stop_spawn = true;
+            w.scene.disable_cob_delay = disable_cob_delay;
 
             auto it = test.ops.begin();
             int curr_tick = it->tick; // there is at least 1 op (setup)
@@ -100,6 +101,7 @@ int main()
     auto config_file = get_cmd_arg(args, "f");
     auto output_file = get_cmd_arg(args, "o", "explode_test");
     auto total_repeat_num = std::stoi(get_cmd_arg(args, "r", "10000"));
+    auto disable_cob_delay = !get_cmd_flag(args, "cd");
 
     auto [file, full_output_file] = open_csv(output_file);
 
@@ -108,7 +110,7 @@ int main()
 
     std::vector<std::thread> threads;
     for (int repeat : assign_repeat(total_repeat_num, std::thread::hardware_concurrency())) {
-        threads.emplace_back([config, repeat]() { test_one(config, repeat); });
+        threads.emplace_back([config, repeat, disable_cob_delay]() { test_one(config, repeat, disable_cob_delay); });
     }
     for (auto& t : threads) {
         t.join();

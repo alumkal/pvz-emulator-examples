@@ -127,7 +127,7 @@ public:
             imitater_type(plant_type::none),
             cold_down(0) {}
     };
-    
+
     std::array<card_data, 10> cards;
 
     bool is_game_over;
@@ -142,6 +142,7 @@ public:
     bool disable_crater;
     bool lock_dx;
     float lock_dx_val;
+    bool disable_cob_delay;
 /* 可配置部分结束 */
 
     scene(scene_type t) : type(t),
@@ -154,7 +155,8 @@ public:
         is_future_enabled(false),
         stop_spawn(false),
         enable_split_pea_bug(true),
-        disable_garg_throw_imp(false) {}
+        disable_garg_throw_imp(false),
+        disable_cob_delay(false) {}
 
     scene(const scene& s);
 

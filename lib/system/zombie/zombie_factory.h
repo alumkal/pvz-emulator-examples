@@ -15,14 +15,14 @@ private:
     system::rng rng;
 
     zombie_subsystems subsystems;
-    
+
     bool can_spawn_at_row(object::zombie_type type, unsigned int row);
-    unsigned int get_spawn_row(object::zombie_type type);
 
     void create_pool_or_night_lurking(object::zombie_type type, unsigned int row, unsigned int col);
     void create_roof_lurking(object::zombie_type type, unsigned int row, unsigned int col);
 
 public:
+    unsigned int get_spawn_row(object::zombie_type type);
     zombie_factory(object::scene& s) :
         scene(s),
         data(s.spawn),

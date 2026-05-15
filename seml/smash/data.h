@@ -55,9 +55,8 @@ OpState categorize(const ActionInfo& action_info, const GigaInfo& garg_info)
             }
         }
         return OpState::Miss;
-    } else {
-        assert(false && "unreachable");
     }
+    __builtin_unreachable();
 }
 
 } // namespace _smash_internal

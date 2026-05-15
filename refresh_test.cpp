@@ -49,12 +49,13 @@ TestInfos test_infos;
 
 void test_one(const Config& config, int repeat, const ZombieTypes& required_types,
     const ZombieTypes& banned_types, bool huge, bool assume_activate,
-    zombie_dance_cheat dance_cheat, bool natural)
+    zombie_dance_cheat dance_cheat, bool natural, bool disable_cob_delay)
 {
     std::mt19937 rng(
         static_cast<unsigned int>(std::chrono::steady_clock::now().time_since_epoch().count()));
     world w(config.setting.scene_type);
     w.scene.stop_spawn = true;
+    w.scene.disable_cob_delay = disable_cob_delay;
     TestInfos local_test_infos;
 
     for (int round_idx = 0; round_idx < repeat; round_idx++) {
@@ -196,6 +197,7 @@ int main()
     auto assume_activate = get_cmd_flag(args, "a");
     auto use_dance_cheat = get_cmd_flag(args, "d");
     auto natural = get_cmd_flag(args, "n");
+    auto disable_cob_delay = !get_cmd_flag(args, "cd");
     auto enable_raw = get_cmd_flag(args, "raw");
     auto dance_cheat = get_dance_cheat(use_dance_cheat, assume_activate);
 
@@ -207,9 +209,9 @@ int main()
     std::vector<std::thread> threads;
     for (int repeat : assign_repeat(total_repeat_num, std::thread::hardware_concurrency())) {
         threads.emplace_back([config, repeat, required_types, banned_types, huge, assume_activate,
-                                 dance_cheat, natural]() {
+                                 dance_cheat, natural, disable_cob_delay]() {
             test_one(config, repeat, required_types, banned_types, huge, assume_activate,
-                dance_cheat, natural);
+                dance_cheat, natural, disable_cob_delay);
         });
     }
     for (auto& t : threads) {

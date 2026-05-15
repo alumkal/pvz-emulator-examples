@@ -15,9 +15,8 @@ scene_type str_to_scene_type(const std::string& str) {
         return scene_type::roof;
     } else if (str == "ME") {
         return scene_type::moon_night;
-    } else {
-        assert(false && "unreachable");
     }
+    throw std::invalid_argument("invalid scene type: " + str);
 }
 
 std::string scene_type_to_str(scene_type scene) {
@@ -33,9 +32,8 @@ std::string scene_type_to_str(scene_type scene) {
         return "RE";
     } else if (scene == scene_type::moon_night) {
         return "ME";
-    } else {
-        assert(false && "unreachable");
     }
+    __builtin_unreachable();
 }
 
 scene::scene(const scene& s) :
@@ -277,7 +275,7 @@ void scene::to_json(rapidjson::Writer<rapidjson::StringBuffer>& writer) {
         writer.StartObject();
         writer.Key("type");
         writer.String(plant::type_to_string(card.type));
-        
+
         writer.Key("imitater_type");
         writer.String(plant::type_to_string(card.imitater_type));
 

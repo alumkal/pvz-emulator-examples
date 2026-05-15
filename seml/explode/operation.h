@@ -36,7 +36,7 @@ void insert_setup(Test& test, int tick, const std::vector<Setting::ProtectPos>& 
 
 void insert_spawn(Test& test, int tick)
 {
-    auto f = [tick](pvz_emulator::world& w) {
+    auto f = [](pvz_emulator::world& w) {
         for (const auto& type : {zombie_type::jack_in_the_box, zombie_type::ladder,
                  zombie_type::football, zombie_type::catapult}) {
             for (int r = 0; r < 5; r++) {
@@ -60,7 +60,7 @@ void insert_cob(Test& test, int tick, const Cob* cob, const scene_type& scene_ty
     auto cob_col = cob->cob_col;
 
     for (const auto& pos : cob->positions) {
-        auto f = [&test, pos, cob_col](
+        auto f = [pos, cob_col](
                      pvz_emulator::world& w) { launch_cob(w, pos.row, pos.col, cob_col); };
         test.ops.push_back({tick - get_cob_fly_time(scene_type, pos.row, pos.col, cob_col), f});
     }
@@ -97,7 +97,7 @@ void insert_smart_card(Test& test, int tick, const SmartCard* smart_card)
     auto positions = smart_card->positions;
     int max_card_zombie_row_diff = get_smart_card_max_card_zombie_row_diff(smart_card);
 
-    auto f = [&test, plant_type, positions, max_card_zombie_row_diff](pvz_emulator::world& w) {
+    auto f = [plant_type, positions, max_card_zombie_row_diff](pvz_emulator::world& w) {
         auto chosen = choose_by_num(w, positions, 1, {},
             {zombie_type::giga_gargantuar, zombie_type::gargantuar}, max_card_zombie_row_diff);
         assert(chosen.size() == 1);

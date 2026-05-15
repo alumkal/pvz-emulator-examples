@@ -3,7 +3,7 @@
 #include <map>
 #include <sstream>
 
-#include "types.h"
+#include "world.h"
 
 namespace _refresh_internal {
 
@@ -40,7 +40,8 @@ std::string zombie_type_to_name(pvz_emulator::object::zombie_type type)
 }
 
 std::string zombie_types_to_names(
-    const ZombieTypes& zombie_types, const std::string& fallback = "　")
+    const std::unordered_set<pvz_emulator::object::zombie_type>& zombie_types,
+    const std::string& fallback = "　")
 {
     if (zombie_types.empty()) {
         return "无";

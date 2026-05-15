@@ -81,7 +81,12 @@ void read_action(const rapidjson::Value& val, std::vector<std::shared_ptr<Action
         fixed_card.plant_type
             = static_cast<pvz_emulator::object::plant_type>(val["plantType"].GetInt());
         std::unordered_set<pvz_emulator::object::plant_type> allowed_types = {
-            plant_type::cherry_bomb, plant_type::jalapeno, plant_type::squash, plant_type::garlic};
+            plant_type::cherry_bomb,
+            plant_type::jalapeno,
+            plant_type::doomshroom,
+            plant_type::squash,
+            plant_type::garlic,
+        };
         assert(allowed_types.count(fixed_card.plant_type));
 
         fixed_card.position.row = val["position"]["row"].GetInt();

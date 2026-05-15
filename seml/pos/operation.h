@@ -1,32 +1,41 @@
 #pragma once
 
 #include "common/pe.h"
+#include "constants/constants.h"
 #include "seml/operation.h"
 #include "types.h"
 
-namespace _refresh_internal {
+namespace _pos_internal {
 
 using scene_type = pvz_emulator::object::scene_type;
 using plant_type = pvz_emulator::object::plant_type;
 using zombie_type = pvz_emulator::object::zombie_type;
-using zombie_dance_cheat = pvz_emulator::object::zombie_dance_cheat;
 
-void insert_spawn(Test& test, int tick, const std::array<zombie_type, 50>& spawn_list, bool huge,
-    zombie_dance_cheat dance_cheat)
+void insert_setup(Test& test, int tick, const std::vector<Setting::ProtectPos>& protect_positions)
 {
-    auto f = [&test, spawn_list, huge, dance_cheat](pvz_emulator::world& w) {
-        auto spawn_wave = huge ? 9 : 5;
-        w.scene.spawn.wave = spawn_wave;
-        for (const auto& type : spawn_list) {
-            auto& z = w.zombie_factory.create(type);
-            if ((type == zombie_type::zombie || type == zombie_type::conehead
-                    || type == zombie_type::buckethead)
-                && dance_cheat != zombie_dance_cheat::none) {
-                z.dance_cheat = dance_cheat;
+    auto f = [protect_positions, &test](pvz_emulator::world& w) {
+        // Place protect plants at specified positions
+        for (const auto& pos : protect_positions) {
+            auto plant_type_to_place = pos.is_cob() ? plant_type::cob_cannon : plant_type::umbrella_leaf;
+
+            auto& p = w.plant_factory.create(
+                plant_type_to_place, pos.row - 1, pos.is_cob() ? pos.col - 2 : pos.col - 1);
+            p.ignore_jack_explode = true;
+            p.hp = p.max_hp = 1'000'000'000;
+            test.protect_plants.push_back(&p);
+        }
+    };
+    test.ops.push_back({tick, f});
+}
+
+void insert_spawn(Test& test, int tick, const std::vector<zombie_type>& zombie_types)
+{
+    auto f = [zombie_types](pvz_emulator::world& w) {
+        for (const auto& type : zombie_types) {
+            for (int i = 0; i < 5; i++) {
+                w.zombie_factory.create(type);
             }
         }
-        w.scene.spawn.wave++; // required for get_current_hp() to work correctly
-        test.init_hp = static_cast<int>(w.spawn.get_current_hp());
     };
     test.ops.push_back({tick, f});
 }
@@ -44,8 +53,8 @@ void insert_cob(Test& test, int tick, const Cob* cob, const scene_type& scene_ty
     auto cob_col = cob->cob_col;
 
     for (const auto& pos : cob->positions) {
-        auto f = [pos, cob_col](
-                     pvz_emulator::world& w) { launch_cob(w, pos.row, pos.col, cob_col); };
+        auto f
+            = [pos, cob_col](pvz_emulator::world& w) { launch_cob(w, pos.row, pos.col, cob_col); };
         test.ops.push_back({tick - get_cob_fly_time(scene_type, pos.row, pos.col, cob_col), f});
     }
 }
@@ -117,7 +126,7 @@ void insert_fixed_fodder(Test& test, int tick, const FixedFodder* fodder)
                 }
             }
         };
-        test.ops.push_back({tick + fodder->shovel_time - fodder->time, f});
+        test.ops.push_back({tick - fodder->time + fodder->shovel_time, f});
     }
 }
 
@@ -164,21 +173,23 @@ void insert_smart_fodder(Test& test, int tick, const SmartFodder* fodder)
                 }
             }
         };
-        test.ops.push_back({tick + fodder->shovel_time - fodder->time, f});
+        test.ops.push_back({tick - fodder->time + fodder->shovel_time, f});
     }
 }
 
-} // namespace _refresh_internal
+} // namespace _pos_internal
 
-void load_wave(const Setting& setting, const Wave& wave, const ZombieList& spawn_list, bool huge,
-    pvz_emulator::object::zombie_dance_cheat dance_cheat, Test& test)
+void load_wave(const Setting& setting, const Wave& wave,
+    const std::vector<pvz_emulator::object::zombie_type>& zombie_types, Test& test)
 {
-    using namespace _refresh_internal;
+    using namespace _pos_internal;
 
     test = {};
+    test.protect_plants.reserve(setting.protect_positions.size());
 
     int base_tick = 0;
-    insert_spawn(test, base_tick, spawn_list, huge, dance_cheat);
+    insert_setup(test, base_tick, setting.protect_positions);
+    insert_spawn(test, base_tick, zombie_types);
 
     for (const auto& ice_time : wave.ice_times) {
         insert_ice(test, base_tick + ice_time - 99);

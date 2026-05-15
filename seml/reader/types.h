@@ -27,6 +27,7 @@ struct Action {
     std::string symbol;
     int time;
     virtual std::string desc() const = 0;
+    virtual ~Action() = default;
 };
 
 struct Cob : Action {
